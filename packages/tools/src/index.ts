@@ -10,6 +10,7 @@ import { GitTools } from './tools/git.js';
 import { DeveloperTools } from './tools/developer.js';
 import { BrowserTools } from './tools/browser.js';
 import { VisionTools } from './tools/vision.js';
+import { DiagnosticsTools } from './tools/diagnostics.js';
 
 export interface ExecutableTool<TParams = any, TResult = any> {
   name: string;
@@ -105,6 +106,9 @@ export class ToolRegistry {
 
     // Vision
     this.register(VisionTools.captureScreen);
+
+    // Diagnostics
+    this.register(DiagnosticsTools.selfDiagnose);
   }
 }
 
@@ -116,4 +120,5 @@ export {
   DeveloperTools,
   BrowserTools,
   VisionTools,
+  DiagnosticsTools,
 };

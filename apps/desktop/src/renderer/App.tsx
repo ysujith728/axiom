@@ -4,6 +4,10 @@ import { AxiomCore } from './components/core/AxiomCore';
 import { ActivityStream } from './components/activity/ActivityStream';
 import { PermissionModal } from './components/permissions/PermissionModal';
 import { SystemMonitor } from './components/system/SystemMonitor';
+import { ModelManagerView } from './components/models/ModelManagerView';
+import { MemoryView } from './components/memory/MemoryView';
+import { TasksView } from './components/tasks/TasksView';
+import { FullSystemDiagnosticsView } from './components/system/FullSystemDiagnosticsView';
 import {
   Mic,
   MicOff,
@@ -11,16 +15,17 @@ import {
   Minus,
   Square,
   X,
-  Terminal,
-  Shield,
-  Layers,
-  Cpu,
+  Compass,
   Database,
-  Radio,
-  Sparkles,
+  Calendar,
+  Activity,
+  Cpu,
 } from 'lucide-react';
 
+type ActiveTab = 'command' | 'models' | 'memory' | 'tasks' | 'diagnostics';
+
 export const App: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<ActiveTab>('command');
   const [state, setState] = useState<ExecutionState>('IDLE');
   const [goalInput, setGoalInput] = useState('');
   const [currentPlan, setCurrentPlan] = useState<AgentPlan | null>(null);
@@ -30,13 +35,11 @@ export const App: React.FC = () => {
   const [isVoiceActive, setIsVoiceActive] = useState(false);
 
   useEffect(() => {
-    // Check if running inside Electron with window.axiom bridge
     const axiom = (window as any).axiom;
     if (!axiom) {
-      // Mock metrics for web/vite preview mode
       setMetrics({
         timestamp: Date.now(),
-        cpuUsagePercent: 12,
+        cpuUsagePercent: 14,
         totalMemoryMB: 16384,
         usedMemoryMB: 7168,
         freeMemoryMB: 9216,
@@ -89,7 +92,6 @@ export const App: React.FC = () => {
         setState('FAILED');
       }
     } else {
-      // Web preview fallback simulation
       setTimeout(() => setState('PLANNING'), 400);
       setTimeout(() => {
         const dummyPlan: AgentPlan = {
@@ -149,12 +151,72 @@ export const App: React.FC = () => {
     <div className="flex flex-col h-screen w-screen bg-[#08090d] text-slate-100 font-sans select-none overflow-hidden">
       {/* Top Custom Titlebar */}
       <header className="h-10 flex items-center justify-between px-4 bg-[#0a0d14] border-b border-white/5 drag-region">
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-3">
           <div className="w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-[0_0_8px_#00f0ff]" />
           <span className="font-semibold text-xs tracking-wider text-white">AXIOM</span>
-          <span className="text-[10px] font-mono text-slate-500 uppercase px-2 py-0.5 rounded bg-white/5">
-            Local Intelligence Core
-          </span>
+
+          {/* Navigation Tabs */}
+          <nav className="flex items-center gap-1 ml-4 no-drag">
+            <button
+              onClick={() => setActiveTab('command')}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-mono transition-colors ${
+                activeTab === 'command'
+                  ? 'bg-white/10 text-cyan-300 font-medium'
+                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <Compass className="w-3.5 h-3.5" />
+              <span>Core</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('models')}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-mono transition-colors ${
+                activeTab === 'models'
+                  ? 'bg-white/10 text-cyan-300 font-medium'
+                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <Cpu className="w-3.5 h-3.5" />
+              <span>Models</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('memory')}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-mono transition-colors ${
+                activeTab === 'memory'
+                  ? 'bg-white/10 text-cyan-300 font-medium'
+                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <Database className="w-3.5 h-3.5" />
+              <span>Memory</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('tasks')}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-mono transition-colors ${
+                activeTab === 'tasks'
+                  ? 'bg-white/10 text-cyan-300 font-medium'
+                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <Calendar className="w-3.5 h-3.5" />
+              <span>Tasks</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('diagnostics')}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-mono transition-colors ${
+                activeTab === 'diagnostics'
+                  ? 'bg-white/10 text-cyan-300 font-medium'
+                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <Activity className="w-3.5 h-3.5" />
+              <span>Health</span>
+            </button>
+          </nav>
         </div>
 
         {/* Window Controls */}
@@ -180,92 +242,100 @@ export const App: React.FC = () => {
         </div>
       </header>
 
-      {/* Main Command Center Layout */}
+      {/* Main Content Area */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Left / Center: AXIOM Intelligence Core & Conversation View */}
-        <main className="flex-1 flex flex-col items-center justify-between p-6 relative overflow-hidden">
-          {/* Subtle Ambient Radial Glow */}
-          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-cyan-500/5 blur-[120px] rounded-full pointer-events-none" />
+        {activeTab === 'command' && (
+          <>
+            {/* Center: AXIOM Intelligence Core & Conversation */}
+            <main className="flex-1 flex flex-col items-center justify-between p-6 relative overflow-hidden">
+              <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-cyan-500/5 blur-[120px] rounded-full pointer-events-none" />
 
-          {/* Central AXIOM Core Visualization */}
-          <div className="flex-1 flex flex-col items-center justify-center w-full z-10">
-            <AxiomCore state={state} size={280} />
-            <div className="mt-4 text-center max-w-md">
-              <h1 className="text-xl font-medium tracking-tight text-white mb-1">
-                {state === 'IDLE' && 'How can I assist your computer today?'}
-                {state === 'LISTENING' && 'Listening for your command...'}
-                {state === 'UNDERSTANDING' && 'Decomposing natural-language intent...'}
-                {state === 'PLANNING' && 'Formulating execution steps & safety tiers...'}
-                {state === 'WAITING_FOR_PERMISSION' && 'Waiting for your authorization...'}
-                {state === 'EXECUTING' && 'Operating tools with controlled boundaries...'}
-                {state === 'VERIFYING' && 'Verifying result evidence before reporting...'}
-                {state === 'COMPLETED' && 'Goal accomplished and verified.'}
-                {state === 'FAILED' && 'Task encountered an issue.'}
-              </h1>
-              <p className="text-xs text-slate-400 font-mono">
-                {currentPlan?.goal ? `Goal: "${currentPlan.goal}"` : 'Local-first • Privacy conscious • Hardware aware'}
-              </p>
-            </div>
-          </div>
+              <div className="flex-1 flex flex-col items-center justify-center w-full z-10">
+                <AxiomCore state={state} size={280} />
+                <div className="mt-4 text-center max-w-md">
+                  <h1 className="text-xl font-medium tracking-tight text-white mb-1">
+                    {state === 'IDLE' && 'How can I assist your computer today?'}
+                    {state === 'LISTENING' && 'Listening for your command...'}
+                    {state === 'UNDERSTANDING' && 'Decomposing natural-language intent...'}
+                    {state === 'PLANNING' && 'Formulating execution steps & safety tiers...'}
+                    {state === 'WAITING_FOR_PERMISSION' && 'Waiting for your authorization...'}
+                    {state === 'EXECUTING' && 'Operating tools with controlled boundaries...'}
+                    {state === 'VERIFYING' && 'Verifying result evidence before reporting...'}
+                    {state === 'COMPLETED' && 'Goal accomplished and verified.'}
+                    {state === 'FAILED' && 'Task encountered an issue.'}
+                  </h1>
+                  <p className="text-xs text-slate-400 font-mono">
+                    {currentPlan?.goal ? `Goal: "${currentPlan.goal}"` : 'Local-first • Privacy conscious • Hardware aware'}
+                  </p>
+                </div>
+              </div>
 
-          {/* Quick Prompts */}
-          <div className="w-full max-w-xl flex flex-wrap gap-2 justify-center mb-3 z-10">
-            {[
-              'Open Visual Studio Code',
-              'Inspect Git repository status',
-              'Run project tests',
-              'Check system hardware load',
-            ].map((p) => (
-              <button
-                key={p}
-                onClick={() => handleQuickPrompt(p)}
-                className="text-[11px] font-mono px-3 py-1 rounded-full bg-white/[0.03] hover:bg-white/[0.08] border border-white/5 text-slate-300 transition-colors"
+              {/* Quick Prompts */}
+              <div className="w-full max-w-xl flex flex-wrap gap-2 justify-center mb-3 z-10">
+                {[
+                  'Open Visual Studio Code',
+                  'Inspect Git repository status',
+                  'Run project tests',
+                  'Capture desktop screenshot',
+                  'Search web for local LLMs',
+                ].map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => handleQuickPrompt(p)}
+                    className="text-[11px] font-mono px-3 py-1 rounded-full bg-white/[0.03] hover:bg-white/[0.08] border border-white/5 text-slate-300 transition-colors"
+                  >
+                    {p}
+                  </button>
+                ))}
+              </div>
+
+              {/* Command Bar */}
+              <form
+                onSubmit={handleSubmitGoal}
+                className="w-full max-w-2xl bg-white/[0.04] border border-white/10 hover:border-cyan-500/50 focus-within:border-cyan-400 focus-within:shadow-[0_0_25px_rgba(0,240,255,0.2)] rounded-2xl p-2 flex items-center gap-3 backdrop-blur-xl transition-all z-10"
               >
-                {p}
-              </button>
-            ))}
-          </div>
+                <button
+                  type="button"
+                  onClick={() => setIsVoiceActive(!isVoiceActive)}
+                  className={`p-2.5 rounded-xl border transition-all ${
+                    isVoiceActive
+                      ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300 shadow-[0_0_12px_#00f0ff]'
+                      : 'bg-white/5 border-white/10 text-slate-400 hover:text-white'
+                  }`}
+                >
+                  {isVoiceActive ? <Mic className="w-4 h-4" /> : <MicOff className="w-4 h-4" />}
+                </button>
 
-          {/* Futuristic Command Bar */}
-          <form
-            onSubmit={handleSubmitGoal}
-            className="w-full max-w-2xl bg-white/[0.04] border border-white/10 hover:border-cyan-500/50 focus-within:border-cyan-400 focus-within:shadow-[0_0_25px_rgba(0,240,255,0.2)] rounded-2xl p-2 flex items-center gap-3 backdrop-blur-xl transition-all z-10"
-          >
-            <button
-              type="button"
-              onClick={() => setIsVoiceActive(!isVoiceActive)}
-              className={`p-2.5 rounded-xl border transition-all ${
-                isVoiceActive
-                  ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300 shadow-[0_0_12px_#00f0ff]'
-                  : 'bg-white/5 border-white/10 text-slate-400 hover:text-white'
-              }`}
-            >
-              {isVoiceActive ? <Mic className="w-4 h-4" /> : <MicOff className="w-4 h-4" />}
-            </button>
+                <input
+                  type="text"
+                  value={goalInput}
+                  onChange={(e) => setGoalInput(e.target.value)}
+                  placeholder="Ask AXIOM to operate your computer, run code, or inspect files..."
+                  className="flex-1 bg-transparent text-sm text-slate-100 placeholder-slate-500 focus:outline-none font-sans px-2"
+                />
 
-            <input
-              type="text"
-              value={goalInput}
-              onChange={(e) => setGoalInput(e.target.value)}
-              placeholder="Ask AXIOM to operate your computer, run code, or inspect files..."
-              className="flex-1 bg-transparent text-sm text-slate-100 placeholder-slate-500 focus:outline-none font-sans px-2"
-            />
+                <button
+                  type="submit"
+                  disabled={!goalInput.trim()}
+                  className="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 disabled:opacity-30 disabled:hover:bg-cyan-600 text-white font-medium text-xs flex items-center gap-1.5 shadow-lg shadow-cyan-600/30 transition-all"
+                >
+                  <span>Execute</span>
+                  <Send className="w-3.5 h-3.5" />
+                </button>
+              </form>
+            </main>
 
-            <button
-              type="submit"
-              disabled={!goalInput.trim()}
-              className="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 disabled:opacity-30 disabled:hover:bg-cyan-600 text-white font-medium text-xs flex items-center gap-1.5 shadow-lg shadow-cyan-600/30 transition-all"
-            >
-              <span>Execute</span>
-              <Send className="w-3.5 h-3.5" />
-            </button>
-          </form>
-        </main>
+            {/* Right: Live Activity Stream */}
+            <aside className="w-80 border-l border-white/5 bg-[#0a0d14]/70 backdrop-blur-xl flex flex-col">
+              <ActivityStream plan={currentPlan} activeStep={activeStep} />
+            </aside>
+          </>
+        )}
 
-        {/* Right Sidebar: Real-time Tool Activity Stream */}
-        <aside className="w-80 border-l border-white/5 bg-[#0a0d14]/70 backdrop-blur-xl flex flex-col">
-          <ActivityStream plan={currentPlan} activeStep={activeStep} />
-        </aside>
+        {activeTab === 'models' && <ModelManagerView />}
+        {activeTab === 'memory' && <MemoryView />}
+        {activeTab === 'tasks' && <TasksView />}
+        {activeTab === 'diagnostics' && <FullSystemDiagnosticsView />}
       </div>
 
       {/* Bottom Live Hardware Monitor */}
