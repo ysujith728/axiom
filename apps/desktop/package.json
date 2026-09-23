@@ -4,11 +4,14 @@
   "type": "module",
   "private": true,
   "description": "Desktop interface for AXIOM autonomous computer agent",
-  "main": "./dist-electron/main.js",
+  "main": "./dist-electron/main/index.js",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "build:renderer": "vite build",
+    "build:electron": "tsc -p tsconfig.electron.json",
+    "build": "npm run build:renderer && npm run build:electron",
+    "preview": "vite preview",
+    "start": "electron ./dist-electron/main/index.js"
   },
   "dependencies": {
     "@axiom/shared": "*",

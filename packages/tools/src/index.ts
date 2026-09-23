@@ -8,6 +8,8 @@ import { TerminalTools } from './tools/terminal.js';
 import { WindowsTools } from './tools/windows.js';
 import { GitTools } from './tools/git.js';
 import { DeveloperTools } from './tools/developer.js';
+import { BrowserTools } from './tools/browser.js';
+import { VisionTools } from './tools/vision.js';
 
 export interface ExecutableTool<TParams = any, TResult = any> {
   name: string;
@@ -96,7 +98,22 @@ export class ToolRegistry {
     // Developer
     this.register(DeveloperTools.inspectProject);
     this.register(DeveloperTools.runTests);
+
+    // Browser
+    this.register(BrowserTools.navigateTo);
+    this.register(BrowserTools.searchWeb);
+
+    // Vision
+    this.register(VisionTools.captureScreen);
   }
 }
 
-export { FileSystemTools, TerminalTools, WindowsTools, GitTools, DeveloperTools };
+export {
+  FileSystemTools,
+  TerminalTools,
+  WindowsTools,
+  GitTools,
+  DeveloperTools,
+  BrowserTools,
+  VisionTools,
+};
