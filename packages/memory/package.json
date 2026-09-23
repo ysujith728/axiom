@@ -1,0 +1,16 @@
+{
+  "name": "@axiom/memory",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Persistent local memory store for AXIOM with category filtering and search",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "dependencies": {
+    "@axiom/shared": "*",
+    "@axiom/config": "*"
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "clean": "rimraf dist"
+  }
+}

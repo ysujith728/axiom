@@ -1,0 +1,16 @@
+{
+  "name": "@axiom/voice",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local voice interaction pipeline, wake-word state machine, and audio synthesis for AXIOM",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "dependencies": {
+    "@axiom/shared": "*",
+    "@axiom/config": "*"
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "clean": "rimraf dist"
+  }
+}

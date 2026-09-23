@@ -1,0 +1,5 @@
+pywinauto>=0.6.8
+pillow>=10.4.0
+pytesseract>=0.3.10
+numpy>=1.26.0
+pygetwindow>=0.0.9

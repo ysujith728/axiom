@@ -1,0 +1,16 @@
+{
+  "name": "@axiom/models",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Pluggable model abstraction, Ollama integration, and resource-aware selection for AXIOM",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "dependencies": {
+    "@axiom/shared": "*",
+    "@axiom/config": "*"
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "clean": "rimraf dist"
+  }
+}

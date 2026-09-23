@@ -1,0 +1,12 @@
+{
+  "name": "@axiom/shared",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Shared domain types, contracts, and IPC protocols for AXIOM",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc --build",
+    "clean": "rimraf dist"
+  }
+}

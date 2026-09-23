@@ -1,0 +1,16 @@
+{
+  "name": "@axiom/permissions",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Centralized 4-tier permission engine and audit logger for AXIOM",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "dependencies": {
+    "@axiom/shared": "*",
+    "@axiom/config": "*"
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "clean": "rimraf dist"
+  }
+}

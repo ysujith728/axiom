@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "files": [],
+  "references": [
+    { "path": "./packages/shared" },
+    { "path": "./packages/config" },
+    { "path": "./packages/permissions" },
+    { "path": "./packages/tools" },
+    { "path": "./packages/models" },
+    { "path": "./packages/memory" },
+    { "path": "./packages/agent" },
+    { "path": "./packages/voice" }
+  ]
+}

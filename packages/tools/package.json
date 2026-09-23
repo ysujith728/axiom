@@ -1,0 +1,17 @@
+{
+  "name": "@axiom/tools",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Tool registry, implementations, and verification adapters for AXIOM",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "dependencies": {
+    "@axiom/shared": "*",
+    "@axiom/config": "*",
+    "@axiom/permissions": "*"
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "clean": "rimraf dist"
+  }
+}
