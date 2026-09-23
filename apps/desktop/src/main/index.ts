@@ -3,6 +3,7 @@
  */
 
 import { app, BrowserWindow, ipcMain } from 'electron';
+import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { IPC_CHANNELS } from '@axiom/shared';
@@ -12,6 +13,9 @@ import { ToolRegistry } from '@axiom/tools';
 import { ModelManager } from '@axiom/models';
 import { MemoryStore } from '@axiom/memory';
 import { AgentRuntime } from '@axiom/agent';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -30,6 +34,7 @@ const agentRuntime = new AgentRuntime(
 );
 
 function createWindow() {
+  const preloadPath = path.join(__dirname, '../preload/index.js');
   mainWindow = new BrowserWindow({
     width: 1440,
     height: 900,
@@ -39,18 +44,18 @@ function createWindow() {
     titleBarStyle: 'hidden',
     backgroundColor: '#08090d',
     webPreferences: {
-      preload: path.join(__dirname, '../preload/index.js'),
+      preload: preloadPath,
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true,
     },
   });
 
-  const isDev = process.env.NODE_ENV !== 'production';
-  if (isDev) {
-    mainWindow.loadURL('http://localhost:5173');
+  const distHtml = path.join(__dirname, '../../dist/index.html');
+  if (fs.existsSync(distHtml)) {
+    mainWindow.loadFile(distHtml);
   } else {
-    mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
+    mainWindow.loadURL('http://localhost:5173');
   }
 
   // Forward Agent events to renderer
