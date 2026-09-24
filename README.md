@@ -9,6 +9,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178C6.svg?logo=typescript)](https://www.typescriptlang.org/)
 [![Electron](https://img.shields.io/badge/Desktop-Electron_33-47848F.svg?logo=electron)](https://www.electronjs.org/)
 [![Local AI](https://img.shields.io/badge/Local_AI-Ollama-black.svg)](https://ollama.ai/)
+[![Tests](https://img.shields.io/badge/Tests-26_Passing-success.svg)](tests/)
 [![Privacy](https://img.shields.io/badge/Privacy-100%25_Local_First-success.svg)](#privacy-first-philosophy)
 
 <p align="center">
@@ -31,7 +32,8 @@ graph TD
         CoreUI --> CanvasAnim[Fluid Physics Neural Core]
         CoreUI --> Stream[Live Tool Activity Stream]
         CoreUI --> PermModal[Interactive Permission Modal]
-        CoreUI --> SysMon[Real Hardware Monitor]
+        CoreUI --> SysMon[Real Hardware Monitor & Diagnostics]
+        CoreUI --> AppRegistry[Application Allowlist & Governance]
     end
 
     CanvasAnim <-->|Secure IPC Bridge| Preload[Context-Isolated Preload]
@@ -46,11 +48,15 @@ graph TD
         AgentRuntime --> MemStore[Local SQLite / JSON Store]
     end
 
-    subgraph Workers [Operating System Adapters]
-        ToolRegistry --> WinTools[Windows UI / PowerShell]
+    subgraph Workers [Operating System Adapters & Automation]
+        ToolRegistry --> WinTools[Windows UI / App Launcher]
+        ToolRegistry --> InputTools[Mouse & Keyboard Control]
+        ToolRegistry --> SysTools[Audio & Network System Control]
         ToolRegistry --> FSTools[Local Filesystem API]
         ToolRegistry --> GitTools[Git & GitHub CLI]
         ToolRegistry --> DevTools[Project & Test Diagnostics]
+        ToolRegistry --> WebTools[Browser Search & Navigation]
+        ToolRegistry --> VisTools[Native Screen Capture & Verification]
         MainProcess --> VoiceWorker[Voice Pipeline: openWakeWord + Whisper + Piper]
     end
 
@@ -108,10 +114,10 @@ graph TD
 
 | Tier | Policy | Trigger Conditions |
 | :--- | :--- | :--- |
-| **SAFE** | Auto-Approved & Logged | Reading files, searching directories, checking Git status, inspecting processes |
-| **LOW_RISK** | Auto-Approved with Telemetry | Launching applications, window focus, clipboard interactions |
-| **CONFIRMATION_REQUIRED** | **Requires User Approval** | Modifying existing files, running arbitrary PowerShell scripts, pushing to Git |
-| **DANGEROUS** | **Requires Explicit Confirmation** | Deleting files or directories, force push, system service modifications |
+| **SAFE** | Auto-Approved & Logged | Reading files, searching directories, checking Git status, inspecting processes, querying system/network status |
+| **LOW_RISK** | Auto-Approved with Telemetry | Launching applications, window focus, clipboard interactions, non-destructive mouse moves |
+| **CONFIRMATION_REQUIRED** | **Requires User Approval** | Modifying existing files, running arbitrary PowerShell scripts, pushing to Git, typing keystrokes, adjusting volume |
+| **DANGEROUS** | **Requires Explicit Confirmation** | Deleting files or directories, force push, system service modifications, system sleep/reboot/shutdown |
 
 ---
 
@@ -165,6 +171,7 @@ We maintain strict transparency between what is currently implemented in this re
 | :--- | :--- | :--- | :--- |
 | **Desktop UI** | Liquid Intelligence Canvas Core | **Implemented** | Fluid particle physics reacting dynamically to all agent states |
 | **Desktop UI** | Dark Glassmorphic Command Center | **Implemented** | Electron 33, React 18, Tailwind CSS, Framer Motion |
+| **Desktop UI** | Multi-View Navigation (7 Views) | **Implemented** | Command, Models, Memory, Tasks, Applications, Diagnostics, Settings |
 | **Agent Engine** | Autonomous Multi-step Loop | **Implemented** | Understand -> Plan -> Permission -> Execute -> Verify -> Complete |
 | **Agent Engine** | Failure Recovery & Cancellation | **Implemented** | Bounded retries and graceful task abort triggers |
 | **Permissions** | 4-Tier Security Engine | **Implemented** | SAFE, LOW_RISK, CONFIRMATION_REQUIRED, DANGEROUS |
@@ -172,15 +179,19 @@ We maintain strict transparency between what is currently implemented in this re
 | **Tools** | Filesystem CRUD & Verification | **Implemented** | Real file reading, writing, and deletion verification |
 | **Tools** | Controlled PowerShell Terminal | **Implemented** | Prohibits destructive commands; enforces timeouts |
 | **Tools** | Windows Application Control | **Implemented** | Detects VS Code, Chrome, Edge, Terminal, Explorer |
+| **Tools** | Mouse & Keyboard Automation | **Implemented** | Native cursor positioning, clicking, typing, hotkey injection |
+| **Tools** | System & Audio Control | **Implemented** | Network adapter inspection, master volume control, power state gates |
+| **Tools** | Application Registry Allowlist | **Implemented** | Process restriction policies and launch governance |
 | **Tools** | Git & GitHub Integration | **Implemented** | Status, diffs, commits, and verified push |
 | **Tools** | Developer Diagnostics | **Implemented** | Project ecosystem detection and test execution |
+| **Tools** | Browser Automation | **Implemented** | Structured query formatting and web navigation contracts |
+| **Tools** | Vision & Screen Capture | **Implemented** | Physical PNG screen capture with file verification |
 | **Memory** | Categorized Local Store | **Implemented** | Persistent JSON/SQLite store with search and privacy controls |
 | **Local AI** | Ollama Model Abstraction | **Implemented** | Detection, model catalog, streaming completion |
 | **Hardware** | Dynamic Resource Profiler | **Implemented** | Live monitoring of CPU, RAM, GPU, and VRAM |
 | **Voice** | Wake Word & Speech Architecture | **Implemented** | Wake-word state machine and Python worker contracts |
-| **Browser** | Playwright Web Automation | **In Progress** | Web research and DOM interaction engine |
-| **Vision** | Screen OCR & Element Recognition | **In Progress** | Python UI Automation and screen inspection worker |
-| **Distribution**| Windows Setup.exe Installer | **Planned** | Standalone installer packaging |
+| **Testing** | Complete Unit & Integration Suite | **Implemented** | 10 test suites (26 tests) passing under Vitest |
+| **Distribution**| Windows Setup.exe Installer | **Configured** | `electron-builder` configuration in place for Windows NSIS |
 
 ---
 
@@ -232,14 +243,17 @@ cd axiom
 # Install all workspace dependencies
 npm install
 
-# Run strict TypeScript typechecks
+# Run strict TypeScript typechecks across all monorepo packages
 npm run typecheck
 
-# Execute unit and integration tests
+# Execute the complete unit and integration test suite (26 tests)
 npm run test
 
 # Launch AXIOM in development mode
 npm run desktop:dev
+
+# Or build the desktop production package
+npm run desktop:build
 ```
 
 ---

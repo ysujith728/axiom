@@ -11,7 +11,25 @@
     "build:electron": "tsc -p tsconfig.electron.json",
     "build": "npm run build:renderer && npm run build:electron",
     "preview": "vite preview",
-    "start": "electron ./dist-electron/main/index.js"
+    "start": "electron ./dist-electron/main/index.js",
+    "package": "electron-builder --win"
+  },
+  "build": {
+    "appId": "com.axiom.desktop",
+    "productName": "AXIOM",
+    "directories": {
+      "output": "release"
+    },
+    "win": {
+      "target": ["nsis"]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "AXIOM"
+    }
   },
   "dependencies": {
     "@axiom/shared": "*",

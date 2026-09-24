@@ -11,6 +11,9 @@ import { DeveloperTools } from './tools/developer.js';
 import { BrowserTools } from './tools/browser.js';
 import { VisionTools } from './tools/vision.js';
 import { DiagnosticsTools } from './tools/diagnostics.js';
+import { MouseKeyboardTools } from './tools/mouse_keyboard.js';
+import { ApplicationRegistryTools } from './tools/applications.js';
+import { SystemControlTools } from './tools/system_control.js';
 
 export interface ExecutableTool<TParams = any, TResult = any> {
   name: string;
@@ -84,30 +87,45 @@ export class ToolRegistry {
     // Terminal
     this.register(TerminalTools.executePowerShell);
 
-    // Windows
+    // Windows Desktop Management
     this.register(WindowsTools.listWindows);
     this.register(WindowsTools.launchApplication);
     this.register(WindowsTools.getClipboard);
     this.register(WindowsTools.setClipboard);
 
-    // Git
+    // Mouse & Keyboard Input
+    this.register(MouseKeyboardTools.mouseMove);
+    this.register(MouseKeyboardTools.mouseClick);
+    this.register(MouseKeyboardTools.keyboardType);
+    this.register(MouseKeyboardTools.keyboardHotkey);
+
+    // Application Registry
+    this.register(ApplicationRegistryTools.listApplications);
+    this.register(ApplicationRegistryTools.setApplicationRestriction);
+
+    // System Control & Audio
+    this.register(SystemControlTools.getNetworkStatus);
+    this.register(SystemControlTools.setVolume);
+    this.register(SystemControlTools.systemPower);
+
+    // Git & GitHub
     this.register(GitTools.gitStatus);
     this.register(GitTools.gitDiff);
     this.register(GitTools.gitCommit);
     this.register(GitTools.gitPush);
 
-    // Developer
+    // Developer Assistance
     this.register(DeveloperTools.inspectProject);
     this.register(DeveloperTools.runTests);
 
-    // Browser
+    // Web & Browser
     this.register(BrowserTools.navigateTo);
     this.register(BrowserTools.searchWeb);
 
-    // Vision
+    // Vision & OCR
     this.register(VisionTools.captureScreen);
 
-    // Diagnostics
+    // Self-Diagnostics
     this.register(DiagnosticsTools.selfDiagnose);
   }
 }
@@ -121,4 +139,7 @@ export {
   BrowserTools,
   VisionTools,
   DiagnosticsTools,
+  MouseKeyboardTools,
+  ApplicationRegistryTools,
+  SystemControlTools,
 };

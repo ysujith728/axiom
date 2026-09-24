@@ -7,7 +7,9 @@ import { SystemMonitor } from './components/system/SystemMonitor';
 import { ModelManagerView } from './components/models/ModelManagerView';
 import { MemoryView } from './components/memory/MemoryView';
 import { TasksView } from './components/tasks/TasksView';
+import { ApplicationRegistryView } from './components/applications/ApplicationRegistryView';
 import { FullSystemDiagnosticsView } from './components/system/FullSystemDiagnosticsView';
+import { SettingsView } from './components/settings/SettingsView';
 import {
   Mic,
   MicOff,
@@ -20,9 +22,11 @@ import {
   Calendar,
   Activity,
   Cpu,
+  AppWindow,
+  Sliders,
 } from 'lucide-react';
 
-type ActiveTab = 'command' | 'models' | 'memory' | 'tasks' | 'diagnostics';
+type ActiveTab = 'command' | 'models' | 'memory' | 'tasks' | 'applications' | 'diagnostics' | 'settings';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('command');
@@ -206,6 +210,18 @@ export const App: React.FC = () => {
             </button>
 
             <button
+              onClick={() => setActiveTab('applications')}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-mono transition-colors ${
+                activeTab === 'applications'
+                  ? 'bg-white/10 text-cyan-300 font-medium'
+                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <AppWindow className="w-3.5 h-3.5" />
+              <span>Apps</span>
+            </button>
+
+            <button
               onClick={() => setActiveTab('diagnostics')}
               className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-mono transition-colors ${
                 activeTab === 'diagnostics'
@@ -215,6 +231,18 @@ export const App: React.FC = () => {
             >
               <Activity className="w-3.5 h-3.5" />
               <span>Health</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('settings')}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-mono transition-colors ${
+                activeTab === 'settings'
+                  ? 'bg-white/10 text-cyan-300 font-medium'
+                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <Sliders className="w-3.5 h-3.5" />
+              <span>Settings</span>
             </button>
           </nav>
         </div>
@@ -335,7 +363,9 @@ export const App: React.FC = () => {
         {activeTab === 'models' && <ModelManagerView />}
         {activeTab === 'memory' && <MemoryView />}
         {activeTab === 'tasks' && <TasksView />}
+        {activeTab === 'applications' && <ApplicationRegistryView />}
         {activeTab === 'diagnostics' && <FullSystemDiagnosticsView />}
+        {activeTab === 'settings' && <SettingsView />}
       </div>
 
       {/* Bottom Live Hardware Monitor */}
