@@ -79,11 +79,83 @@ export const App: React.FC = () => {
     };
   }, []);
 
-  const handleSubmitGoal = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (!goalInput.trim()) return;
+  const recognitionRef = useRef<any>(null);
 
-    const goal = goalInput;
+  useEffect(() => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      try {
+        const recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = true;
+        recognition.lang = 'en-US';
+
+        recognition.onstart = () => {
+          setIsVoiceActive(true);
+          setState('LISTENING');
+        };
+
+        recognition.onresult = (event: any) => {
+          const transcript = Array.from(event.results)
+            .map((res: any) => res[0].transcript)
+            .join('');
+          setGoalInput(transcript);
+
+          if (event.results[0]?.isFinal) {
+            setIsVoiceActive(false);
+            handleSubmitGoal(transcript);
+          }
+        };
+
+        recognition.onerror = (err: any) => {
+          console.warn('Speech recognition status:', err.error);
+          setIsVoiceActive(false);
+          if (state === 'LISTENING') setState('IDLE');
+        };
+
+        recognition.onend = () => {
+          setIsVoiceActive(false);
+          if (state === 'LISTENING') setState('IDLE');
+        };
+
+        recognitionRef.current = recognition;
+      } catch (e) {
+        console.warn('Speech recognition init error:', e);
+      }
+    }
+  }, [state]);
+
+  const toggleVoice = () => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert('Speech Recognition is not active in this environment. You can type your command below.');
+      return;
+    }
+
+    if (isVoiceActive) {
+      try {
+        recognitionRef.current?.stop();
+      } catch {}
+      setIsVoiceActive(false);
+      if (state === 'LISTENING') setState('IDLE');
+    } else {
+      try {
+        recognitionRef.current?.start();
+      } catch (e) {
+        console.warn('Recognition start error:', e);
+      }
+    }
+  };
+
+  const handleSubmitGoal = async (customGoal?: string | React.FormEvent) => {
+    let goal = goalInput;
+    if (typeof customGoal === 'string') {
+      goal = customGoal;
+    } else if (customGoal && typeof (customGoal as any).preventDefault === 'function') {
+      (customGoal as React.FormEvent).preventDefault();
+    }
+    if (!goal.trim()) return;
+
     setGoalInput('');
     setState('UNDERSTANDING');
 
@@ -149,6 +221,7 @@ export const App: React.FC = () => {
 
   const handleQuickPrompt = (prompt: string) => {
     setGoalInput(prompt);
+    handleSubmitGoal(prompt);
   };
 
   return (
@@ -324,10 +397,11 @@ export const App: React.FC = () => {
               >
                 <button
                   type="button"
-                  onClick={() => setIsVoiceActive(!isVoiceActive)}
+                  onClick={toggleVoice}
+                  title={isVoiceActive ? 'Listening... click to stop' : 'Click to speak to AXIOM'}
                   className={`p-2.5 rounded-xl border transition-all ${
                     isVoiceActive
-                      ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300 shadow-[0_0_12px_#00f0ff]'
+                      ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300 shadow-[0_0_12px_#00f0ff] animate-pulse'
                       : 'bg-white/5 border-white/10 text-slate-400 hover:text-white'
                   }`}
                 >

@@ -2,7 +2,7 @@
  * @axiom/desktop - Electron Main Process with secure IPC and subsystem lifecycle.
  */
 
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, session } from 'electron';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -35,6 +35,17 @@ const agentRuntime = new AgentRuntime(
 
 function createWindow() {
   const preloadPath = path.join(__dirname, '../preload/index.js');
+
+  // Automatically approve media/mic requests for local speech
+  session.defaultSession.setPermissionCheckHandler((_webContents, permission) => {
+    if (permission === 'media') return true;
+    return true;
+  });
+  session.defaultSession.setPermissionRequestHandler((_webContents, permission, callback) => {
+    if (permission === 'media') return callback(true);
+    callback(true);
+  });
+
   mainWindow = new BrowserWindow({
     width: 1440,
     height: 900,

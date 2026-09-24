@@ -214,7 +214,14 @@ export class AgentRuntime extends EventEmitter {
     const lower = goal.toLowerCase();
     const steps: PlanStep[] = [];
 
-    if (lower.includes('vs code') || lower.includes('vscode') || lower.includes('open code')) {
+    if (
+      lower.includes('vs code') ||
+      lower.includes('vscode') ||
+      lower.includes('visual studio code') ||
+      lower.includes('open code') ||
+      lower.includes('launch code') ||
+      lower.includes('start code')
+    ) {
       steps.push({
         id: 'step_1',
         index: 1,
@@ -236,6 +243,112 @@ export class AgentRuntime extends EventEmitter {
         requiresConfirmation: false,
         status: 'pending',
         explanation: 'Confirms that the application window is active',
+      });
+    } else if (lower.includes('cursor')) {
+      steps.push({
+        id: 'step_1',
+        index: 1,
+        title: 'Launch Cursor Editor',
+        toolName: 'launch_application',
+        parameters: { appName: 'cursor' },
+        tier: 'LOW_RISK',
+        requiresConfirmation: false,
+        status: 'pending',
+        explanation: 'Launches Cursor editor process',
+      });
+      steps.push({
+        id: 'step_2',
+        index: 2,
+        title: 'Verify Application Window',
+        toolName: 'list_windows',
+        parameters: {},
+        tier: 'SAFE',
+        requiresConfirmation: false,
+        status: 'pending',
+        explanation: 'Confirms that the application window is active',
+      });
+    } else if (lower.includes('chrome') || lower.includes('google chrome') || lower.includes('open browser')) {
+      steps.push({
+        id: 'step_1',
+        index: 1,
+        title: 'Launch Google Chrome',
+        toolName: 'launch_application',
+        parameters: { appName: 'chrome' },
+        tier: 'LOW_RISK',
+        requiresConfirmation: false,
+        status: 'pending',
+        explanation: 'Launches Chrome browser process',
+      });
+      steps.push({
+        id: 'step_2',
+        index: 2,
+        title: 'Verify Application Window',
+        toolName: 'list_windows',
+        parameters: {},
+        tier: 'SAFE',
+        requiresConfirmation: false,
+        status: 'pending',
+        explanation: 'Confirms that Chrome is running',
+      });
+    } else if (lower.includes('edge') || lower.includes('microsoft edge')) {
+      steps.push({
+        id: 'step_1',
+        index: 1,
+        title: 'Launch Microsoft Edge',
+        toolName: 'launch_application',
+        parameters: { appName: 'edge' },
+        tier: 'LOW_RISK',
+        requiresConfirmation: false,
+        status: 'pending',
+        explanation: 'Launches Microsoft Edge browser process',
+      });
+    } else if (lower.includes('notepad')) {
+      steps.push({
+        id: 'step_1',
+        index: 1,
+        title: 'Launch Notepad',
+        toolName: 'launch_application',
+        parameters: { appName: 'notepad' },
+        tier: 'LOW_RISK',
+        requiresConfirmation: false,
+        status: 'pending',
+        explanation: 'Launches Windows Notepad',
+      });
+    } else if (lower.includes('terminal') || lower.includes('powershell') || lower.includes('command prompt')) {
+      steps.push({
+        id: 'step_1',
+        index: 1,
+        title: 'Launch Windows Terminal',
+        toolName: 'launch_application',
+        parameters: { appName: 'terminal' },
+        tier: 'LOW_RISK',
+        requiresConfirmation: false,
+        status: 'pending',
+        explanation: 'Launches terminal console',
+      });
+    } else if (lower.startsWith('open ') || lower.startsWith('launch ') || lower.startsWith('start ')) {
+      const targetApp = goal.replace(/^(open|launch|start)\s+/i, '').trim();
+      steps.push({
+        id: 'step_1',
+        index: 1,
+        title: `Launch ${targetApp}`,
+        toolName: 'launch_application',
+        parameters: { appName: targetApp },
+        tier: 'LOW_RISK',
+        requiresConfirmation: false,
+        status: 'pending',
+        explanation: `Launches application "${targetApp}"`,
+      });
+      steps.push({
+        id: 'step_2',
+        index: 2,
+        title: 'Verify Application Window',
+        toolName: 'list_windows',
+        parameters: {},
+        tier: 'SAFE',
+        requiresConfirmation: false,
+        status: 'pending',
+        explanation: 'Confirms application window is active',
       });
     } else if (lower.includes('test') || lower.includes('run tests')) {
       steps.push({
