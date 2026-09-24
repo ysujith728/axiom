@@ -17,6 +17,22 @@ import { AgentRuntime } from '@axiom/agent';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Configure Application Identity & Isolated User Data Directory
+app.name = 'axiom';
+app.setAppUserModelId('com.axiom.desktop');
+app.commandLine.appendSwitch('disable-gpu-process-crash-limit');
+
+try {
+  const customUserData = path.join(app.getPath('appData'), 'axiom-desktop');
+  app.setPath('userData', customUserData);
+} catch {}
+
+// Prevent multiple instances from colliding on disk cache
+const gotLock = app.requestSingleInstanceLock();
+if (!gotLock) {
+  app.quit();
+}
+
 let mainWindow: BrowserWindow | null = null;
 
 // Initialize Core Subsystems
@@ -32,6 +48,13 @@ const agentRuntime = new AgentRuntime(
   modelManager,
   memoryStore
 );
+
+app.on('second-instance', () => {
+  if (mainWindow) {
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.focus();
+  }
+});
 
 function createWindow() {
   const preloadPath = path.join(__dirname, '../preload/index.js');
