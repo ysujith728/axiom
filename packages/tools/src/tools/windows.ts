@@ -87,17 +87,39 @@ export const WindowsTools = {
         target = 'notepad';
       }
 
-      // Strip Electron variables so child apps don't exit in headless CLI mode
+      // Strip Electron, VS Code, and Node hijacking variables so child apps run in true standalone GUI mode
       const cleanEnv = { ...process.env };
-      delete cleanEnv.ELECTRON_RUN_AS_NODE;
-      delete cleanEnv.ELECTRON_NO_ASAR;
-      delete cleanEnv.ATOM_SHELL_INTERNAL_RUN_AS_NODE;
+      for (const k of Object.keys(cleanEnv)) {
+        if (
+          k.startsWith('VSCODE_') ||
+          k.startsWith('ELECTRON_') ||
+          k === 'ATOM_SHELL_INTERNAL_RUN_AS_NODE' ||
+          k === 'NODE_OPTIONS'
+        ) {
+          delete cleanEnv[k];
+        }
+      }
 
+      const spawnArgs = params.args ? [params.args] : [];
+
+      // 1. If target is an existing executable path (e.g. Code.exe, chrome.exe)
+      if (fs.existsSync(target)) {
+        try {
+          const child = spawn(target, spawnArgs, {
+            env: cleanEnv,
+            detached: true,
+            stdio: 'ignore',
+          });
+          child.unref();
+          return { success: true, app: params.appName, pid: child.pid };
+        } catch {
+          // continue to cmd fallback
+        }
+      }
+
+      // 2. Command-based launch via Windows shell start
       try {
-        const escapedTarget = target.replace(/'/g, "''");
-        const argsPart = params.args ? ` -ArgumentList '${params.args.replace(/'/g, "''")}'` : '';
-        const psScript = `Start-Process -FilePath '${escapedTarget}'${argsPart}`;
-        const child = spawn('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', psScript], {
+        const child = spawn('cmd.exe', ['/c', 'start', '', target, ...spawnArgs], {
           env: cleanEnv,
           detached: true,
           stdio: 'ignore',
@@ -105,9 +127,12 @@ export const WindowsTools = {
         child.unref();
         return { success: true, app: params.appName, pid: child.pid };
       } catch {
-        // Fallback to Windows cmd start detached
+        // 3. Fallback to PowerShell Start-Process
         try {
-          const child = spawn('cmd.exe', ['/c', 'start', '', target, ...(params.args ? [params.args] : [])], {
+          const escapedTarget = target.replace(/'/g, "''");
+          const argsPart = params.args ? ` -ArgumentList '${params.args.replace(/'/g, "''")}'` : '';
+          const psScript = `Start-Process -FilePath '${escapedTarget}'${argsPart}`;
+          const child = spawn('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', psScript], {
             env: cleanEnv,
             detached: true,
             stdio: 'ignore',

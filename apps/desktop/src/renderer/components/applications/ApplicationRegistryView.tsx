@@ -63,13 +63,17 @@ export const ApplicationRegistryView: React.FC = () => {
   const [apps, setApps] = useState<RegisteredApplication[]>(INITIAL_APPS);
   const [launchMessage, setLaunchMessage] = useState<string | null>(null);
 
-  const handleLaunchApp = (app: RegisteredApplication) => {
+  const handleLaunchApp = async (app: RegisteredApplication) => {
+    console.log('[Renderer] User clicked launch for:', app.name);
     setLaunchMessage(`Launching ${app.name}...`);
     setTimeout(() => setLaunchMessage(null), 3500);
 
     const axiom = (window as any).axiom;
-    if (axiom?.startGoal) {
-      axiom.startGoal(`Launch ${app.name}`);
+    if (axiom?.launchApp) {
+      const res = await axiom.launchApp(app.executable || app.name);
+      console.log('[Renderer] Launch result:', res);
+    } else if (axiom?.startGoal) {
+      await axiom.startGoal(`Launch ${app.name}`);
     }
   };
 

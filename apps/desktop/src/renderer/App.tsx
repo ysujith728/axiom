@@ -158,10 +158,12 @@ export const App: React.FC = () => {
 
     setGoalInput('');
     setState('UNDERSTANDING');
+    console.log('[Renderer] Submitting goal:', goal);
 
     const axiom = (window as any).axiom;
     if (axiom?.startGoal) {
       try {
+        console.log('[Renderer] Calling axiom.startGoal with:', goal);
         await axiom.startGoal(goal);
       } catch (err) {
         console.error('Goal execution error:', err);

@@ -120,11 +120,22 @@ function createWindow() {
 }
 
 // IPC Handlers
+ipcMain.handle('axiom:system:launch-app', async (_, appName: string) => {
+  console.log(`[Main] Launching application directly: "${appName}"`);
+  const result = await toolRegistry.executeTool('launch_application', { appName });
+  console.log(`[Main] Launch result for "${appName}":`, result);
+  return result;
+});
+
 ipcMain.handle(IPC_CHANNELS.AGENT_START_GOAL, async (_, goal: string) => {
-  return agentRuntime.executeGoal(goal);
+  console.log(`[Main] Starting goal: "${goal}"`);
+  const result = await agentRuntime.executeGoal(goal);
+  console.log(`[Main] Goal completed: "${goal}", summary: ${result.summary}`);
+  return result;
 });
 
 ipcMain.handle(IPC_CHANNELS.AGENT_CANCEL, () => {
+  console.log('[Main] Goal cancelled by user');
   agentRuntime.cancel();
   return { success: true };
 });

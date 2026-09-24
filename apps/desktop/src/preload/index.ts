@@ -4,6 +4,7 @@ import { IPC_CHANNELS } from '@axiom/shared';
 // Expose safe, typed API bridge to renderer
 contextBridge.exposeInMainWorld('axiom', {
   startGoal: (goal: string) => ipcRenderer.invoke(IPC_CHANNELS.AGENT_START_GOAL, goal),
+  launchApp: (appName: string) => ipcRenderer.invoke('axiom:system:launch-app', appName),
   cancelTask: () => ipcRenderer.invoke(IPC_CHANNELS.AGENT_CANCEL),
   respondPermission: (allowed: boolean) => ipcRenderer.invoke(IPC_CHANNELS.PERMISSION_RESPONSE, allowed),
   getMetrics: () => ipcRenderer.invoke(IPC_CHANNELS.SYSTEM_GET_METRICS),
