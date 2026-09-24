@@ -32,4 +32,20 @@ describe('Agent Autonomous Loop Integration', () => {
     expect(statesVisited).toContain('VERIFYING');
     expect(statesVisited).toContain('COMPLETED');
   });
+
+  it('plans and executes "Open Visual Studio Code" goal with verified success', async () => {
+    const statesVisited: string[] = [];
+    agent.on('state', (data) => statesVisited.push(data.state));
+
+    const result = await agent.executeGoal('Open Visual Studio Code');
+
+    expect(result.success).toBe(true);
+    expect(result.plan.steps.length).toBe(2);
+    expect(result.plan.steps[0].toolName).toBe('launch_application');
+    expect(result.plan.steps[0].status).toBe('completed');
+    expect(result.plan.steps[0].verification?.verified).toBe(true);
+    expect(result.plan.steps[1].toolName).toBe('list_windows');
+    expect(result.plan.steps[1].status).toBe('completed');
+    expect(result.plan.status).toBe('completed');
+  });
 });
