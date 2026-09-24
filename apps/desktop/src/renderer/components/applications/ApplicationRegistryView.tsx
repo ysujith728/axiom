@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { RegisteredApplication } from '@axiom/shared';
-import { AppWindow, Shield, CheckCircle2, Lock, Ban } from 'lucide-react';
+import { AppWindow, Shield, CheckCircle2, Lock, Ban, Play } from 'lucide-react';
 
 const INITIAL_APPS: RegisteredApplication[] = [
   {
@@ -61,6 +61,17 @@ const INITIAL_APPS: RegisteredApplication[] = [
 
 export const ApplicationRegistryView: React.FC = () => {
   const [apps, setApps] = useState<RegisteredApplication[]>(INITIAL_APPS);
+  const [launchMessage, setLaunchMessage] = useState<string | null>(null);
+
+  const handleLaunchApp = (app: RegisteredApplication) => {
+    setLaunchMessage(`Launching ${app.name}...`);
+    setTimeout(() => setLaunchMessage(null), 3500);
+
+    const axiom = (window as any).axiom;
+    if (axiom?.startGoal) {
+      axiom.startGoal(`Launch ${app.name}`);
+    }
+  };
 
   const toggleStatus = (id: string) => {
     setApps(
@@ -86,6 +97,11 @@ export const ApplicationRegistryView: React.FC = () => {
             AXIOM only operates explicitly registered Windows applications. Configure automation permissions per application.
           </p>
         </div>
+        {launchMessage && (
+          <div className="px-3 py-1.5 rounded-lg bg-cyan-500/20 border border-cyan-400/40 text-cyan-300 text-xs font-mono animate-pulse">
+            {launchMessage}
+          </div>
+        )}
       </div>
 
       <div className="grid gap-3">
@@ -120,15 +136,26 @@ export const ApplicationRegistryView: React.FC = () => {
               </div>
             </div>
 
-            <button
-              onClick={() => toggleStatus(app.id)}
-              className="text-xs font-mono px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 flex items-center gap-1.5"
-            >
-              {app.status === 'enabled' && <Shield className="w-3.5 h-3.5 text-emerald-400" />}
-              {app.status === 'restricted' && <Lock className="w-3.5 h-3.5 text-amber-400" />}
-              {app.status === 'disabled' && <Ban className="w-3.5 h-3.5 text-rose-400" />}
-              <span>Toggle Status</span>
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => handleLaunchApp(app)}
+                disabled={app.status === 'disabled'}
+                className="text-xs font-mono px-3.5 py-1.5 rounded-xl bg-cyan-600/30 hover:bg-cyan-500/40 border border-cyan-500/50 text-cyan-200 flex items-center gap-1.5 transition-all shadow-[0_0_12px_rgba(0,240,255,0.15)] disabled:opacity-30 disabled:pointer-events-none"
+              >
+                <Play className="w-3.5 h-3.5 fill-cyan-300" />
+                <span>Launch</span>
+              </button>
+
+              <button
+                onClick={() => toggleStatus(app.id)}
+                className="text-xs font-mono px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 flex items-center gap-1.5"
+              >
+                {app.status === 'enabled' && <Shield className="w-3.5 h-3.5 text-emerald-400" />}
+                {app.status === 'restricted' && <Lock className="w-3.5 h-3.5 text-amber-400" />}
+                {app.status === 'disabled' && <Ban className="w-3.5 h-3.5 text-rose-400" />}
+                <span>Toggle Status</span>
+              </button>
+            </div>
           </div>
         ))}
       </div>

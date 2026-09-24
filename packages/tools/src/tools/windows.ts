@@ -15,8 +15,8 @@ export const WindowsTools = {
     tier: 'SAFE' as RiskTier,
     async execute(): Promise<Array<{ id: number; name: string; title: string }>> {
       try {
-        const ps = `Get-Process | Where-Object { $_.MainWindowTitle } | Select-Object Id, ProcessName, MainWindowTitle | ConvertTo-Json`;
-        const { stdout } = await execAsync(`powershell.exe -NoProfile -Command "& { ${ps} }"`);
+        const ps = `Get-Process | Where-Object MainWindowTitle | Select-Object Id, ProcessName, MainWindowTitle | ConvertTo-Json`;
+        const { stdout } = await execAsync(`powershell.exe -NoProfile -Command "${ps}"`);
         if (!stdout.trim()) return [];
         const parsed = JSON.parse(stdout);
         const array = Array.isArray(parsed) ? parsed : [parsed];
@@ -51,8 +51,7 @@ export const WindowsTools = {
       const programFiles = process.env.ProgramFiles || '';
       const programFilesX86 = process.env['ProgramFiles(x86)'] || '';
 
-      let exePath: string | null = null;
-      let shellCmd: string | null = null;
+      let target = params.appName;
 
       if (name.includes('code') || name.includes('vscode') || name.includes('visual studio')) {
         const candidates = [
@@ -60,60 +59,64 @@ export const WindowsTools = {
           path.join(programFiles, 'Microsoft VS Code', 'Code.exe'),
           path.join(programFilesX86, 'Microsoft VS Code', 'Code.exe'),
         ];
-        exePath = candidates.find((p) => fs.existsSync(p)) || null;
-        if (!exePath) shellCmd = 'code';
+        const found = candidates.find((p) => fs.existsSync(p));
+        target = found || 'code';
       } else if (name.includes('cursor')) {
-        const candidates = [
-          path.join(localAppData, 'Programs', 'cursor', 'Cursor.exe'),
-        ];
-        exePath = candidates.find((p) => fs.existsSync(p)) || null;
-        if (!exePath) shellCmd = 'cursor';
+        const p = path.join(localAppData, 'Programs', 'cursor', 'Cursor.exe');
+        target = fs.existsSync(p) ? p : 'cursor';
       } else if (name.includes('chrome')) {
         const candidates = [
           path.join(programFiles, 'Google', 'Chrome', 'Application', 'chrome.exe'),
           path.join(programFilesX86, 'Google', 'Chrome', 'Application', 'chrome.exe'),
           path.join(localAppData, 'Google', 'Chrome', 'Application', 'chrome.exe'),
         ];
-        exePath = candidates.find((p) => fs.existsSync(p)) || null;
-        if (!exePath) shellCmd = 'chrome';
+        const found = candidates.find((p) => fs.existsSync(p));
+        target = found || 'chrome';
       } else if (name.includes('edge')) {
         const candidates = [
           path.join(programFilesX86, 'Microsoft', 'Edge', 'Application', 'msedge.exe'),
           path.join(programFiles, 'Microsoft', 'Edge', 'Application', 'msedge.exe'),
         ];
-        exePath = candidates.find((p) => fs.existsSync(p)) || null;
-        if (!exePath) shellCmd = 'msedge';
+        const found = candidates.find((p) => fs.existsSync(p));
+        target = found || 'msedge';
       } else if (name.includes('terminal') || name.includes('wt')) {
-        shellCmd = 'wt';
+        target = 'wt';
       } else if (name.includes('explorer') || name.includes('folder')) {
-        shellCmd = 'explorer';
+        target = 'explorer';
       } else if (name.includes('notepad')) {
-        shellCmd = 'notepad';
-      } else {
-        shellCmd = params.appName;
+        target = 'notepad';
       }
 
+      // Strip Electron variables so child apps don't exit in headless CLI mode
+      const cleanEnv = { ...process.env };
+      delete cleanEnv.ELECTRON_RUN_AS_NODE;
+      delete cleanEnv.ELECTRON_NO_ASAR;
+      delete cleanEnv.ATOM_SHELL_INTERNAL_RUN_AS_NODE;
+
       try {
-        if (exePath && fs.existsSync(exePath)) {
-          const spawnArgs = params.args ? [params.args] : [];
-          const child = spawn(exePath, spawnArgs, {
+        const escapedTarget = target.replace(/'/g, "''");
+        const argsPart = params.args ? ` -ArgumentList '${params.args.replace(/'/g, "''")}'` : '';
+        const psScript = `Start-Process -FilePath '${escapedTarget}'${argsPart}`;
+        const child = spawn('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', psScript], {
+          env: cleanEnv,
+          detached: true,
+          stdio: 'ignore',
+        });
+        child.unref();
+        return { success: true, app: params.appName, pid: child.pid };
+      } catch {
+        // Fallback to Windows cmd start detached
+        try {
+          const child = spawn('cmd.exe', ['/c', 'start', '', target, ...(params.args ? [params.args] : [])], {
+            env: cleanEnv,
             detached: true,
             stdio: 'ignore',
-            shell: false,
           });
           child.unref();
           return { success: true, app: params.appName, pid: child.pid };
-        } else if (shellCmd) {
-          const child = spawn('cmd.exe', ['/c', 'start', '', shellCmd, ...(params.args ? [params.args] : [])], {
-            detached: true,
-            stdio: 'ignore',
-          });
-          child.unref();
-          return { success: true, app: params.appName, pid: child.pid };
+        } catch {
+          return { success: false, app: params.appName };
         }
-        return { success: false, app: params.appName };
-      } catch (err: any) {
-        return { success: false, app: params.appName };
       }
     },
     async verify(params: { appName: string }): Promise<VerificationResult> {
