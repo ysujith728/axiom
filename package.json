@@ -23,9 +23,10 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint . --ext .ts,.tsx",
-    "desktop:dev": "npm run --workspace=@axiom/desktop dev",
+    "desktop:dev": "npm run --workspace=@axiom/desktop start",
     "desktop:build": "npm run --workspace=@axiom/desktop build",
-    "desktop:start": "electron ./apps/desktop/dist-electron/main/index.js"
+    "desktop:start": "npm run --workspace=@axiom/desktop start",
+    "start": "npm run --workspace=@axiom/desktop start"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
