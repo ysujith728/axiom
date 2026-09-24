@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import type { ExecutionState, AgentPlan, PlanStep, SystemMetrics } from '@axiom/shared';
 import { AxiomCore } from './components/core/AxiomCore';
 import { ActivityStream } from './components/activity/ActivityStream';

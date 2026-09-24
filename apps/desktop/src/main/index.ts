@@ -57,7 +57,9 @@ app.on('second-instance', () => {
 });
 
 function createWindow() {
-  const preloadPath = path.join(__dirname, '../preload/index.js');
+  const preloadCjs = path.join(__dirname, '../preload/index.cjs');
+  const preloadJs = path.join(__dirname, '../preload/index.js');
+  const preloadPath = fs.existsSync(preloadCjs) ? preloadCjs : preloadJs;
 
   // Automatically approve media/mic requests for local speech
   session.defaultSession.setPermissionCheckHandler((_webContents, permission) => {
@@ -83,6 +85,10 @@ function createWindow() {
       nodeIntegration: false,
       sandbox: true,
     },
+  });
+
+  mainWindow.webContents.on('console-message', (_event, level, message) => {
+    console.log(`[Renderer] ${message}`);
   });
 
   const distHtml = path.join(__dirname, '../../dist/index.html');
